@@ -1,4 +1,4 @@
-# from sense_hat import SenseHat
+from sense_hat import SenseHat
 from datetime import datetime
 import time, random, csv, math
 
