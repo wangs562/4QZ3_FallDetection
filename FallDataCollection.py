@@ -5,6 +5,10 @@ import time, random
 # rpiSense.clear()
 
 LED_SCREEN_SIZE = 8
+
+GREETING_TEXT = "FALL DETECTION SYSTEM - SAM WANG - IBEHS 4QZ3"
+
+DEFAULT_TEXT_COLOR = (0, 0, 0)
 COLOR_ARRAY = [
     (255, 0, 0),
     (255, 182, 0),
@@ -52,14 +56,25 @@ def screenFlairLED(startPos = 0):
 def initializeSystem():
     screenFlairLED()
 
+    screenClear()
+    setScreenText(GREETING_TEXT)
+
+
+
+# Utility Functions
+def setScreenText(screenText, textColor = DEFAULT_TEXT_COLOR, scrollSpeed = 0.05):
+    # sense.show_message(screenText, text_colour = textColor, scroll_speed = scrollSpeed)
+    print(screenText)
+
+def screenClear():
+    # sense.clear(255, 255, 255)
+    print("Cleared Screen")
+
 
 
 # Main Function
 def main():
     initializeSystem()
-
-main()
     
 
-# plan:
-# coordinates of screen flair will always equal 0 to 7
+main()
