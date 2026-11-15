@@ -110,19 +110,21 @@ def getGyroAngVelData():
 
 
 # Joystick Functions
-def getJSPos(csvArray):
+def getJSPos(csvArray, activeState):
     csvA = csvArray
+    aState = activeState
 
     for event in rpiSense.stick.get_events():
-        csvA = dataCollectionSelector(event.direction, event.action, csvA)
+        csvA, aState = dataCollectionSelector(event.direction, event.action, csvA, aState)
 
-    return csvA
+    return csvA, aState
 
 
 
 # Data Collection Logic Functions
-def dataCollectionSelector(jsDirection, jsAction, csvArray):
+def dataCollectionSelector(jsDirection, jsAction, csvArray, activeState):
     csvA = csvArray
+    aState = activeState
 
     if jsAction == "pressed":
         if csvArray == []:
@@ -135,11 +137,14 @@ def dataCollectionSelector(jsDirection, jsAction, csvArray):
             elif jsDirection == "right":
                 csvA = initializeCSV("Standing")
 
-        elif jsDirection == "down" and csvArray != []:
-            closeCSV(csvArray)
-            csvA = []
+        elif csvArray != []:
+            if jsDirection == "down":
+                closeCSV(csvArray)
+                csvA = []
+            elif jsDirection == "middle":
+                aState = not activeState
 
-    return csvA
+    return csvA, aState
 
 
 
@@ -149,7 +154,7 @@ def initializeCSV(activityType):
 
     dataFile = open(fileName, "w", newline = '')
     writer = csv.writer(dataFile)
-    writer.writerow(["Activity", "Time", "Ax", "Ay", "Az", "Amag", "Pitch", "Roll", "Yaw", "AVx", "AVy", "AVz"])
+    writer.writerow(["Activity", "Time", "Active", "Ax", "Ay", "Az", "Amag", "Pitch", "Roll", "Yaw", "AVx", "AVy", "AVz"])
 
     csvArray = [fileName, dataFile, writer, activityType]
 
@@ -158,10 +163,11 @@ def initializeCSV(activityType):
 def closeCSV(csvArray):
     csvArray[1].close()
 
-def writeDataColumn(accelUnit, oriUnit, AVUnit, csvArray):
+def writeDataColumn(accelUnit, oriUnit, AVUnit, csvArray, activeState):
     csvArray[2].writerow([
         csvArray[3],
         datetime.now().isoformat(), 
+        activeState, 
         accelUnit[0], accelUnit[1], accelUnit[2], accelUnit[3],
         oriUnit[0], oriUnit[1], oriUnit[2],
         AVUnit[0], AVUnit[1], AVUnit[2]
@@ -176,9 +182,10 @@ def main():
     initializeSystem()
 
     csvFileArray = []
+    activityState = False
 
     while True:
-        csvFileArray = getJSPos(csvFileArray)
+        csvFileArray, activityState = getJSPos(csvFileArray, activityState)
         time.sleep(0.05)
 
         if csvFileArray != []:
@@ -186,7 +193,7 @@ def main():
             oriData = getGyroOrientationData()
             angVelData = getGyroAngVelData()
 
-            writeDataColumn(accelData, oriData, angVelData, csvFileArray)
+            writeDataColumn(accelData, oriData, angVelData, csvFileArray, activityState)
 
 
 main()
