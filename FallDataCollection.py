@@ -1,5 +1,6 @@
 from sense_hat import SenseHat
-import time, random
+from datetime import datetime
+import time, random, csv, math
 
 # rpiSense = SenseHat()
 # rpiSense.clear()
@@ -8,7 +9,7 @@ LED_SCREEN_SIZE = 8
 
 GREETING_TEXT = "FALL DETECTION SYSTEM - SAM WANG - IBEHS 4QZ3"
 
-DEFAULT_TEXT_COLOR = (0, 0, 0)
+DEFAULT_TEXT_COLOR = (255, 255, 255)
 COLOR_ARRAY = [
     (255, 0, 0),
     (255, 182, 0),
@@ -20,7 +21,9 @@ COLOR_ARRAY = [
     (255, 0, 255)
 ]
 
-# Initialization Functions
+
+
+# Screen Flair Functions
 def screenFlairCoordinateControl(coordIndex, rowIndex):
     coordinateArray = []
 
@@ -49,9 +52,9 @@ def screenFlairLED(startPos = 0):
         screenFlairLEDControl(coordIndex, targetCoordinateArray)
 
 
-
+# Initialization Functions
 def initializeSensors():
-    # sense.set_imu_config(False, True, True)
+    # rpiSense.set_imu_config(False, True, True)
 
     print("All Sensors Activated")
 
@@ -66,57 +69,119 @@ def initializeSystem():
 
 # Utility Functions
 def setScreenText(screenText, textColor = DEFAULT_TEXT_COLOR, scrollSpeed = 0.05):
-    # sense.show_message(screenText, text_colour = textColor, scroll_speed = scrollSpeed)
+    # rpiSense.show_message(screenText, text_colour = textColor, scroll_speed = scrollSpeed)
     print(screenText)
 
 def screenClear():
-    # sense.clear(255, 255, 255)
+    # rpiSense.clear(255, 255, 255)
     print("Cleared Screen")
 
 
 
 # Accelerometer/Gyroscope Functions
 def getAccelerometerData():
-    # accelerationRaw = sense.get_accelerometer_raw()
+    # accelerationRaw = rpiSense.get_accelerometer_raw()
 
     # test data! delete later :)
     accelerationRaw = {'x': (random.randint(0, 100)) / 100,'y': (random.randint(0, 100)) / 100,'z': (random.randint(0, 100)) / 100}
 
-    time.sleep(0.05)
+    Ax = accelerationRaw['x']
+    Ay = accelerationRaw['y']
+    Az = accelerationRaw['z']
 
-    return [accelerationRaw['x'], accelerationRaw['y'], accelerationRaw['z']]
+    AMag = math.sqrt(Ax**2 + Ay**2 + Az**2)
+
+    return [Ax, Ay, Az, AMag]
 
 def getGyroOrientation():
-    # oriRaw = sense.get_orientation()
+    # oriRaw = rpiSense.get_orientation()
     
     # test data! delete later :)
     oriRaw = {'pitch': (random.randint(0, 100)) / 100,'roll': (random.randint(0, 100)) / 100,'yaw': (random.randint(0, 100)) / 100}
-
-    time.sleep(0.05)
     
     return [oriRaw['pitch'], oriRaw['roll'], oriRaw['yaw']]
 
 def getGyroAngVel():
-    # angVelRaw = sense.get_gyroscope_raw()
+    # angVelRaw = rpiSense.get_gyroscope_raw()
         
     # test data! delete later :)
     angVelRaw = {'x': (random.randint(0, 100)) / 100,'y': (random.randint(0, 100)) / 100,'z': (random.randint(0, 100)) / 100}
-    
-    time.sleep(0.05)
         
     return [angVelRaw['x'], angVelRaw['y'], angVelRaw['z']]
 
 
 
+# Joystick Functions
+def getJSPos(csvArray):
+    csvA = csvArray
+
+    for event in rpiSense.stick.get_events():
+        csvA = dataCollectionSelector(event.direction, event.action, csvA)
+
+    return csvA
+
+
+
+# Data Collection Logic Functions
+def dataCollectionSelector(jsDirection, jsAction, csvArray):
+    csvA = csvArray
+
+    if jsAction == "pressed":
+        if csvArray == []:
+            if jsDirection == "up":
+                csvA = initializeCSV("Lying")
+
+            elif jsDirection == "left":
+                csvA = initializeCSV("Sitting")
+
+            elif jsDirection == "right":
+                csvA = initializeCSV("Standing")
+
+        elif jsDirection == "down" and csvArray != []:
+            closeCSV(csvArray)
+            csvA = []
+
+    return csvA
+
+
+
 # Data Storage Functions
-def logData():
-    print("data logged :)")
+def initializeCSV(activityType):
+    fileName = "log_" + activityType + "_" + datetime.now().strftime ("%Y-%m-%d_%H-%M-%S") + "_data.csv"
+
+    dataFile = open(fileName, "w", newline = '')
+    writer = csv.writer(dataFile)
+    writer.writerow(["Activity", "Time", "Ax", "Ay", "Az", "Amag", "Pitch", "Roll", "Yaw", "AVx", "AVy", "AVz"])
+
+    csvArray = [fileName, dataFile, writer, activityType]
+
+    return csvArray
+
+def closeCSV(csvArray):
+    csvArray[1].close()
+
+def writeDataColumn(accelUnit, oriUnit, AVUnit, csvArray):
+    csvArray[2].writerow([
+        csvArray[3],
+        datetime.now().isoformat(), 
+        accelUnit[0], accelUnit[1], accelUnit[2], accelUnit[3],
+        oriUnit[0], oriUnit[1], oriUnit[2],
+        AVUnit[0], AVUnit[1], AVUnit[2]
+    ])
+
+    csvArray[1].flush()
 
 
 
 # Main Function
 def main():
     initializeSystem()
-    
+
+    csvFileArray = []
+
+    while True:
+        csvFileArray = getJSPos(csvFileArray)
+        time.sleep(0.05)
+
 
 main()
