@@ -25,12 +25,10 @@ def screenFlairCoordinateControl(coordIndex, rowIndex):
     coordinateArray = []
 
     for i in range(coordIndex + 1):
-        targetPos = [rowIndex - i - ((rowIndex - coordIndex) / 2), i + ((rowIndex - coordIndex) / 2)]
+        targetPos = [int(rowIndex - i - ((rowIndex - coordIndex) / 2)), int(i + ((rowIndex - coordIndex) / 2))]
         coordinateArray.append(targetPos)
 
     print(coordinateArray)
-    print("row index: " + str(rowIndex))
-    print("coord index: " + str(coordIndex))
     return coordinateArray
 
 def screenFlairLEDControl(targRowIndex, direction = 0):
@@ -48,11 +46,14 @@ def screenFlairLED(startPos = 0):
     rowIndex = startPos
     
     for rowIndexRaw in range(LED_SCREEN_SIZE * -1 + 1, LED_SCREEN_SIZE):
-        targetCoordinateArray = screenFlairCoordinateControl(-1 * abs(rowIndexRaw) + (LED_SCREEN_SIZE - 1), rowIndexRaw + LED_SCREEN_SIZE - 1)
-        screenFlairLEDControl(rowIndexRaw % 7, 0)
+        coordIndex = -1 * abs(rowIndexRaw) + (LED_SCREEN_SIZE - 1)
+        rowIndex = rowIndexRaw + LED_SCREEN_SIZE - 1
 
-# need to have coordinate index go from 0-7, and row index go from 0-13
-# to get the row indices, use abs. function to iterate from 0 to 7 to 0 (i.e. centered at 7)
+        targetCoordinateArray = screenFlairCoordinateControl(coordIndex, rowIndex)
+        screenFlairLEDControl(coordIndex, 0)
+
+    # the first input of the coordinate control function takes an absolute value function y = -|x| + 7, which will output 7 descending to 0, then ascending to 7
+    # second input will simply shift the raw index so output begins at 0, then increments up to 13
 
 def initializeSensors():
     # sense.set_imu_config(False, True, True)
