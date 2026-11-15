@@ -21,14 +21,16 @@ COLOR_ARRAY = [
 ]
 
 # Initialization Functions
-def screenFlairCoordinateControl(positionCoord):
+def screenFlairCoordinateControl(coordIndex, rowIndex):
     coordinateArray = []
 
-    for i in range(positionCoord + 1):
-        targetPos = [positionCoord - i, i]
+    for i in range(coordIndex + 1):
+        targetPos = [rowIndex - i - ((rowIndex - coordIndex) / 2), i + ((rowIndex - coordIndex) / 2)]
         coordinateArray.append(targetPos)
 
     print(coordinateArray)
+    print("row index: " + str(rowIndex))
+    print("coord index: " + str(coordIndex))
     return coordinateArray
 
 def screenFlairLEDControl(targRowIndex, direction = 0):
@@ -45,16 +47,21 @@ def screenFlairLEDControl(targRowIndex, direction = 0):
 def screenFlairLED(startPos = 0):
     rowIndex = startPos
     
-    for rowIndex in range(LED_SCREEN_SIZE):
-        targetCoordinateArray = screenFlairCoordinateControl(rowIndex)
-        screenFlairLEDControl(rowIndex, 0)
+    for rowIndexRaw in range(LED_SCREEN_SIZE * -1 + 1, LED_SCREEN_SIZE):
+        targetCoordinateArray = screenFlairCoordinateControl(-1 * abs(rowIndexRaw) + (LED_SCREEN_SIZE - 1), rowIndexRaw + LED_SCREEN_SIZE - 1)
+        screenFlairLEDControl(rowIndexRaw % 7, 0)
 
-    for rowIndex in range(LED_SCREEN_SIZE - 2, -1, -1):
-        screenFlairCoordinateControl(rowIndex)
-        screenFlairLEDControl(rowIndex, 1)
+# need to have coordinate index go from 0-7, and row index go from 0-13
+# to get the row indices, use abs. function to iterate from 0 to 7 to 0 (i.e. centered at 7)
+
+def initializeSensors():
+    # sense.set_imu_config(False, True, True)
+
+    print("All Sensors Activated")
 
 def initializeSystem():
     screenFlairLED()
+    initializeSensors()
 
     screenClear()
     setScreenText(GREETING_TEXT)
@@ -71,6 +78,14 @@ def screenClear():
     print("Cleared Screen")
 
 
+
+# Accelerometer Functions
+def getAccelerometerData():
+    accelerationRaw = 0
+    gyroRaw = 0
+
+    # accelerationRaw = sense.get_accelerometer_raw()
+    # gyroRaw = sense.get
 
 # Main Function
 def main():
