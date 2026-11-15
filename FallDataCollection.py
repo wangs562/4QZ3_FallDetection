@@ -1,14 +1,15 @@
-from sense_hat import SenseHat
+# from sense_hat import SenseHat
 from datetime import datetime
 import time, random, csv, math
 
-# rpiSense = SenseHat()
-# rpiSense.clear()
+rpiSense = SenseHat()
+rpiSense.clear()
 
 LED_SCREEN_SIZE = 8
 
 GREETING_TEXT = "FALL DETECTION SYSTEM - SAM WANG - IBEHS 4QZ3"
 
+DEFAULT_SCROLL_SPEED = 0.03
 DEFAULT_TEXT_COLOR = (255, 255, 255)
 COLOR_ARRAY = [
     (255, 0, 0),
@@ -31,14 +32,13 @@ def screenFlairCoordinateControl(coordIndex, rowIndex):
         targetPos = [int(rowIndex - i - ((rowIndex - coordIndex) / 2)), int(i + ((rowIndex - coordIndex) / 2))]
         coordinateArray.append(targetPos)
 
-    print(coordinateArray)
     return coordinateArray
 
 def screenFlairLEDControl(targRowIndex, coordArray):
     targetColor = COLOR_ARRAY[targRowIndex]
 
     for coord in coordArray:
-        # rpiSense.set_pixel(coord[0], coord[1], targetColor)
+        rpiSense.set_pixel(coord[0], coord[1], targetColor)
         time.sleep(0.05)
 
 def screenFlairLED(startPos = 0):
@@ -54,9 +54,7 @@ def screenFlairLED(startPos = 0):
 
 # Initialization Functions
 def initializeSensors():
-    # rpiSense.set_imu_config(False, True, True)
-
-    print("All Sensors Activated")
+    rpiSense.set_imu_config(False, True, True)
 
 def initializeSystem():
     screenFlairLED()
@@ -68,22 +66,22 @@ def initializeSystem():
 
 
 # Utility Functions
-def setScreenText(screenText, textColor = DEFAULT_TEXT_COLOR, scrollSpeed = 0.05):
-    # rpiSense.show_message(screenText, text_colour = textColor, scroll_speed = scrollSpeed)
+def setScreenText(screenText, textColor = DEFAULT_TEXT_COLOR, scrollSpeed = DEFAULT_SCROLL_SPEED):
+    rpiSense.show_message(screenText, text_colour = textColor, scroll_speed = scrollSpeed)
     print(screenText)
 
 def screenClear():
-    # rpiSense.clear(255, 255, 255)
+    rpiSense.clear(255, 255, 255)
     print("Cleared Screen")
 
 
 
 # Accelerometer/Gyroscope Functions
 def getAccelerometerData():
-    # accelerationRaw = rpiSense.get_accelerometer_raw()
+    accelerationRaw = rpiSense.get_accelerometer_raw()
 
     # test data! delete later :)
-    accelerationRaw = {'x': (random.randint(0, 100)) / 100,'y': (random.randint(0, 100)) / 100,'z': (random.randint(0, 100)) / 100}
+    # accelerationRaw = {'x': (random.randint(0, 100)) / 100,'y': (random.randint(0, 100)) / 100,'z': (random.randint(0, 100)) / 100}
 
     Ax = accelerationRaw['x']
     Ay = accelerationRaw['y']
@@ -93,19 +91,19 @@ def getAccelerometerData():
 
     return [Ax, Ay, Az, AMag]
 
-def getGyroOrientation():
-    # oriRaw = rpiSense.get_orientation()
+def getGyroOrientationData():
+    oriRaw = rpiSense.get_orientation()
     
     # test data! delete later :)
-    oriRaw = {'pitch': (random.randint(0, 100)) / 100,'roll': (random.randint(0, 100)) / 100,'yaw': (random.randint(0, 100)) / 100}
+    # oriRaw = {'pitch': (random.randint(0, 100)) / 100,'roll': (random.randint(0, 100)) / 100,'yaw': (random.randint(0, 100)) / 100}
     
     return [oriRaw['pitch'], oriRaw['roll'], oriRaw['yaw']]
 
-def getGyroAngVel():
-    # angVelRaw = rpiSense.get_gyroscope_raw()
+def getGyroAngVelData():
+    angVelRaw = rpiSense.get_gyroscope_raw()
         
     # test data! delete later :)
-    angVelRaw = {'x': (random.randint(0, 100)) / 100,'y': (random.randint(0, 100)) / 100,'z': (random.randint(0, 100)) / 100}
+    # angVelRaw = {'x': (random.randint(0, 100)) / 100,'y': (random.randint(0, 100)) / 100,'z': (random.randint(0, 100)) / 100}
         
     return [angVelRaw['x'], angVelRaw['y'], angVelRaw['z']]
 
@@ -182,6 +180,13 @@ def main():
     while True:
         csvFileArray = getJSPos(csvFileArray)
         time.sleep(0.05)
+
+        if csvFileArray != []:
+            accelData = getAccelerometerData()
+            oriData = getGyroOrientationData()
+            angVelData = getGyroAngVelData()
+
+            writeDataColumn(accelData, oriData, angVelData, csvFileArray)
 
 
 main()
