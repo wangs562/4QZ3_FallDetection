@@ -32,25 +32,23 @@ def screenFlairCoordinateControl(coordIndex, rowIndex):
     return coordinateArray
 
 def screenFlairLEDControl(targRowIndex, coordArray):
-
     targetColor = COLOR_ARRAY[targRowIndex]
 
     for coord in coordArray:
         # rpiSense.set_pixel(coord[0], coord[1], targetColor)
-        time.sleep(0.1)
+        time.sleep(0.05)
 
 def screenFlairLED(startPos = 0):
     rowIndex = startPos
     
     for rowIndexRaw in range(LED_SCREEN_SIZE * -1 + 1, LED_SCREEN_SIZE):
-        coordIndex = -1 * abs(rowIndexRaw) + (LED_SCREEN_SIZE - 1)
-        rowIndex = rowIndexRaw + LED_SCREEN_SIZE - 1
+        coordIndex = -1 * abs(rowIndexRaw) + (LED_SCREEN_SIZE - 1)  # the first input of the coordinate control function takes an absolute value function y = -|x| + 7, which will output 7 descending to 0, then ascending to 7
+        rowIndex = rowIndexRaw + LED_SCREEN_SIZE - 1                # second input will simply shift the raw index so output begins at 0, then increments up to 13
 
         targetCoordinateArray = screenFlairCoordinateControl(coordIndex, rowIndex)
         screenFlairLEDControl(coordIndex, targetCoordinateArray)
 
-    # the first input of the coordinate control function takes an absolute value function y = -|x| + 7, which will output 7 descending to 0, then ascending to 7
-    # second input will simply shift the raw index so output begins at 0, then increments up to 13
+
 
 def initializeSensors():
     # sense.set_imu_config(False, True, True)
@@ -77,13 +75,44 @@ def screenClear():
 
 
 
-# Accelerometer Functions
+# Accelerometer/Gyroscope Functions
 def getAccelerometerData():
-    accelerationRaw = 0
-    gyroRaw = 0
-
     # accelerationRaw = sense.get_accelerometer_raw()
-    # gyroRaw = sense.get
+
+    # test data! delete later :)
+    accelerationRaw = {'x': (random.randint(0, 100)) / 100,'y': (random.randint(0, 100)) / 100,'z': (random.randint(0, 100)) / 100}
+
+    time.sleep(0.05)
+
+    return [accelerationRaw['x'], accelerationRaw['y'], accelerationRaw['z']]
+
+def getGyroOrientation():
+    # oriRaw = sense.get_orientation()
+    
+    # test data! delete later :)
+    oriRaw = {'pitch': (random.randint(0, 100)) / 100,'roll': (random.randint(0, 100)) / 100,'yaw': (random.randint(0, 100)) / 100}
+
+    time.sleep(0.05)
+    
+    return [oriRaw['pitch'], oriRaw['roll'], oriRaw['yaw']]
+
+def getGyroAngVel():
+    # angVelRaw = sense.get_gyroscope_raw()
+        
+    # test data! delete later :)
+    angVelRaw = {'x': (random.randint(0, 100)) / 100,'y': (random.randint(0, 100)) / 100,'z': (random.randint(0, 100)) / 100}
+    
+    time.sleep(0.05)
+        
+    return [angVelRaw['x'], angVelRaw['y'], angVelRaw['z']]
+
+
+
+# Data Storage Functions
+def logData():
+    print("data logged :)")
+
+
 
 # Main Function
 def main():
