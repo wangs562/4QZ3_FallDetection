@@ -8,18 +8,27 @@ LED_SCREEN_SIZE = 8
 
 # LED Screen Flair
 
-def screenFlair():
+def screenFlairLED():
     index = 0
 
-    while index < LED_SCREEN_SIZE:
+    for index in range(LED_SCREEN_SIZE):
         for i in range(index + 1):
             targetPos = [index - i, i]
             print(targetPos) # instead of printing target pos, change to color range
-        
-        index = index + 1
 
+    for index in range(LED_SCREEN_SIZE - 1, -1, -1):
+            for i in range(index + 1):
+                targetPos = [index - i, i]
+                print(targetPos) # instead of printing target pos, change to color range
 
-screenFlair()
+def initializeSystem():
+    screenFlairLED()
+
+def main():
+    initializeSystem()
+
+main()
+    
 
 # plan:
 # coordinates of screen flair will always equal 0 to 7
