@@ -31,15 +31,12 @@ def screenFlairCoordinateControl(coordIndex, rowIndex):
     print(coordinateArray)
     return coordinateArray
 
-def screenFlairLEDControl(targRowIndex, direction = 0):
+def screenFlairLEDControl(targRowIndex, coordArray):
 
-    if (direction == 0):
-        targetColor = COLOR_ARRAY[targRowIndex]
-    elif (direction == 1):
-        targetColor = COLOR_ARRAY[targRowIndex]
+    targetColor = COLOR_ARRAY[targRowIndex]
 
-    for coord in range(targRowIndex):
-        # rpiSense.set_pixel(x, y, targetColor)
+    for coord in coordArray:
+        # rpiSense.set_pixel(coord[0], coord[1], targetColor)
         time.sleep(0.1)
 
 def screenFlairLED(startPos = 0):
@@ -50,7 +47,7 @@ def screenFlairLED(startPos = 0):
         rowIndex = rowIndexRaw + LED_SCREEN_SIZE - 1
 
         targetCoordinateArray = screenFlairCoordinateControl(coordIndex, rowIndex)
-        screenFlairLEDControl(coordIndex, 0)
+        screenFlairLEDControl(coordIndex, targetCoordinateArray)
 
     # the first input of the coordinate control function takes an absolute value function y = -|x| + 7, which will output 7 descending to 0, then ascending to 7
     # second input will simply shift the raw index so output begins at 0, then increments up to 13
